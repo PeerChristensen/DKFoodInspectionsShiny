@@ -3,6 +3,7 @@ library(readxl)
 library(RCurl)
 library(lubridate)
 library(sqldf)
+library(gmailr)
 
 url <- "https://www.foedevarestyrelsen.dk/_layouts/15/sdata/smileystatus.zip"
 
@@ -25,14 +26,16 @@ file_dates <- files %>%
   sort(decreasing=T) %>% 
   map(function(x) as.Date(x))
 
-file_dates_delete <- do.call("c",file_dates) %>%
-  .[3:length(file_dates)]
-
-file_dates_delete %>% map(function(x) str_match_all(string=x,pattern=as.character(file_dates_delete))) %>% 
-  unlist() %>%
-  map(function(x) paste0("smiley_rapport_",x,".xls")) %>%
-  unlist() %>% 
-  map(function(x) unlink(x))
+if (length(file_dates) >= 3) {
+  file_dates_delete <- do.call("c",file_dates) %>%
+    .[3:length(file_dates)]
+  
+  file_dates_delete %>% map(function(x) str_match_all(string=x,pattern=as.character(file_dates_delete))) %>% 
+    unlist() %>%
+    map(function(x) paste0("smiley_rapport_",x,".xls")) %>%
+    unlist() %>% 
+    map(function(x) unlink(x))
+}
 
 file_dates <- do.call("c",file_dates) %>%
   .[1:2]
@@ -48,7 +51,28 @@ df_2 <- read_excel(files_compare[2])
 
 new <- sqldf('SELECT * FROM df_1 EXCEPT SELECT * FROM df_2')
 
-write_csv(new,paste0("deltas/smiley_delta_",today(),".csv"))
+new_filename <- paste0("deltas/smiley_delta_",today(),".csv")
 
-#check 
-df <- read_csv("deltas/smiley_delta_2019-06-21.csv")
+write_csv(new, new_filename)
+
+#check
+
+#df <- read_csv("deltas/smiley_delta_2019-06-21.csv")
+
+my_email <- "hr.pchristensen@gmail.com"
+
+new_controls <- new %>% select(navn1,adresse1,seneste_kontrol)
+
+new_html <- tableHTML(new_controls)
+
+html_body <- "this is a test"
+  
+mime()              %>%
+  from(my_email)    %>%
+  to(my_email)      %>%
+  subject("From R") %>%
+  text_body(html_body) %>%
+  attach_part(html_body) %>%
+  attach_file(new_filename) %>%
+  send_message()
+
