@@ -70,8 +70,8 @@ files_compare <- files %>%
   map(function(x) paste0("smiley_rapport_",x,".xls")) %>%
   unlist()
 
-df_1 <- read_excel(files_compare[1]) #new
-df_2 <- read_excel(files_compare[2]) #old
+df_1 <- read_excel(files_compare[2]) #old
+df_2 <- read_excel(files_compare[1]) #new
 
 #new <- sqldf('SELECT * FROM df_2 EXCEPT SELECT * FROM df_1') %>%
 new <- dplyr::setdiff(df_2,df_1) %>%

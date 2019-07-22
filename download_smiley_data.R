@@ -1,36 +1,38 @@
-# Opdateringer i smiley registret
-# Peer Christensen
-# Juni 2019
-
-# Beskrivelse:
-# Dette script downloader dagligt smiley-registret fra Fødevarestyrelsen.
-# Hver fil sammenlignes med foregående fil, og alle aktuelle opdateringer gemmes
-# i delta-filer.
-# Opdateringer videresendes via email.
-
-# ----- PAKKER ----------
-
-library(tidyverse)
-library(readxl)
-library(RCurl)
-library(lubridate)
-library(sqldf)
-library(gmailr)
-library(cronR)
-
-# ----- DOWNLOAD FIL -----
-
-url <- "https://www.foedevarestyrelsen.dk/_layouts/15/sdata/smileystatus.zip"
-
-destfile <- paste0("smiley_rapport_",today())
-
-download.file(url = url, destfile = destfile, method="libcurl")
-
-unzip(destfile)
-
-destfile2 <- paste0(destfile,".xls")
-
-file.rename(from = "SmileyStatus.xls", to = destfile2)
+# # Opdateringer i smiley registret
+# # Peer Christensen
+# # Juni 2019
+# 
+# # Beskrivelse:
+# # Dette script downloader dagligt smiley-registret fra Fødevarestyrelsen.
+# # Hver fil sammenlignes med foregående fil, og alle aktuelle opdateringer gemmes
+# # i delta-filer.
+# # Opdateringer videresendes via email.
+# 
+# #Sys.setenv("HOME" = "/Users/peerchristensen/Desktop/Projects/Smiley_Data")
+# 
+# # ----- PAKKER ----------
+# 
+# library(tidyverse)
+# library(readxl)
+# library(RCurl)
+# library(lubridate)
+# library(sqldf)
+# library(gmailr)
+# library(cronR)
+# 
+# # ----- DOWNLOAD FIL -----
+# 
+# url <- "https://www.foedevarestyrelsen.dk/_layouts/15/sdata/smileystatus.zip"
+# 
+# destfile <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_data/smiley_rapport_",today())
+# 
+# download.file(url = url, destfile = destfile, method="libcurl")
+# 
+# unzip(destfile)
+# 
+# destfile2 <- paste0(destfile,".xls")
+# 
+# file.rename(from = "SmileyStatus.xls", to = destfile2)
 
 # ----- FORBERED FILER -----
 
@@ -68,19 +70,19 @@ files_compare <- files %>%
 df_1 <- read_excel(files_compare[1])
 df_2 <- read_excel(files_compare[2])
 
-new <- sqldf('SELECT * FROM df_1 EXCEPT SELECT * FROM df_2') %>%
+new <- sqldf('SELECT * FROM df_2 EXCEPT SELECT * FROM df_1') %>%
   mutate(kontrol_beskrivelse = case_when(seneste_kontrol == 1 ~ "ingen anmærkninger",
                                          seneste_kontrol == 2 ~ "indskærpelse",
                                          seneste_kontrol == 3 ~ "Påbud eller forbud",
-                                         seneste_kontrol == 4 ~"(sur smiley) bødeforlæg, politianmeldelse.."
+                                         seneste_kontrol == 4 ~ "(sur smiley) bødeforlæg, politianmeldelse.."
   ))
 
-new_filename <- paste0("deltas/smiley_delta_",today(),".csv")
+new_filename <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/deltas/smiley_delta_",today(),".csv")
 
 if (nrow(new) > 0) {
   write_csv(new, new_filename)
 }
-
+Sys.sleep(15)
 #new %>% 
 #  as_tibble() %>%
 #  select(navn1,cvrnr, adresse1, By, seneste_kontrol, seneste_kontrol_dato, naestseneste_kontrol)
@@ -89,7 +91,7 @@ if (nrow(new) > 0) {
 
 my_email <- "hr.pchristensen@gmail.com"
 
-gmailr::use_secret_file('auto-smiley_secret.json')
+gmailr::use_secret_file('/Users/peerchristensen/Desktop/Projects/Smiley_Data/auto-smiley_secret.json')
 
 #mail_auth(scope = c("read_only", "modify", "compose", "full"), secret_file = 'auto-smiley_secret.json')
 
