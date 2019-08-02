@@ -17,7 +17,6 @@ library(tidyverse)
 library(readxl)
 library(RCurl)
 library(lubridate)
-#library(sqldf)
 library(cronR)
 library(emayili)
 
@@ -70,16 +69,17 @@ files_compare <- files %>%
   map(function(x) paste0("smiley_rapport_",x,".csv")) %>%
   unlist()
 
-setwd("/Users/peerchristensen/Desktop/Projects/Smiley_Data")
-file_path = paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/",files_compare[1])
+no_delim <- function(x) str_remove_all(x,";")
 
 df_1 <- read_csv(files_compare[2]) %>% #old
-  mutate_all(as.character)
-  
-df_2 <- read_csv(files_compare[1]) %>% #new
-  mutate_all(as.character)
+  mutate_all(as.character) %>%
+  rename_all(no_delim) %>%
+  mutate_all(no_delim)
 
-print("check1")
+df_2 <- read_csv(files_compare[1]) %>% #new
+  mutate_all(as.character) %>%
+  rename_all(no_delim) %>%
+  mutate_all(no_delim)
 
 #new <- sqldf('SELECT * FROM df_2 EXCEPT SELECT * FROM df_1') %>%
 new <- dplyr::setdiff(df_2,df_1) %>%
