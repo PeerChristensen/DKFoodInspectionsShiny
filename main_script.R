@@ -90,15 +90,17 @@ if (nrow(new) > 0) {
   write_csv(new, new_filename)
 }
 
-# ----- AARHUS UPDATE ------
+# ----- DK UPDATE ------
 
-aarhus <- new %>%
-  filter(str_starts(postnr, "8"),seneste_kontrol >= 3)
+update <- new %>%
+  filter(seneste_kontrol == 4)
 
-aarhus_filnavn <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/delta_aarhus/smiley_delta_aarhus",today(),".csv")
+update_filnavn <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/delta_sure/smiley_delta_dk_",today(),".csv")
 
-if (nrow(aarhus) > 0) {
-  write_csv(aarhus, aarhus_filnavn)
+if (nrow(update) > 0) {
+  update <- update %>%
+    select(navn1,cvrnr,By,URL)
+  write_csv(update, update_filnavn)
 }
 
 # error message function
@@ -124,15 +126,15 @@ smtp <- server(host = "smtp.gmail.com",
                username = "hr.pchristensen@gmail.com",
                password = "11euheld")
 
-if (nrow(aarhus) == 0) {
+if (nrow(update) == 0) {
   
-  text <- "Ingen nye sure smileys i Aarhusområdet"
+  text <- "Ingen nye sure smileys i dag"
   subject <- "Smiley update: 0 nye"
   
   email <- envelope() %>%
     from(my_email) %>%
     to(my_email) %>%
-#    cc("") %>%
+    #    cc("") %>%
     subject(subject) %>%
     body(text)
   
@@ -142,17 +144,17 @@ if (nrow(aarhus) == 0) {
   )
 }
 
-if (nrow(aarhus) >= 1) {
+if (nrow(update) >= 1) {
   
-  virksomheder = paste(aarhus$navn1,collapse=", ")
-  text <- glue::glue("Kære NN\n\nDe seneste sure smileys er givet til følgende virksomheder: {virksomheder}.\n\n De nye datarækker i smiley-registret er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
+  virksomheder = paste(update$navn1,collapse=", ")
+  text <- glue::glue("Hej!\n\nDe seneste sure smileys er givet til følgende virksomheder: {virksomheder}.\n\n De nye datarækker i smiley-registret er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
   
   email <- envelope() %>%
     from(my_email)    %>%
     to(my_email)      %>%
-    subject(glue::glue("Smiley update: {nrow(aarhus)} nye")) %>%
+    subject(glue::glue("Smiley update: {nrow(update)} nye")) %>%
     body(text) %>%
-    attachment(aarhus_filnavn)
+    attachment(update_filnavn)
   
   tryCatch({
     smtp(email)}, error=function(e) {error_message()
@@ -161,13 +163,85 @@ if (nrow(aarhus) >= 1) {
   )
 }
 
+# # ----- AARHUS UPDATE ------
+# 
+# aarhus <- new %>%
+#   filter(str_starts(postnr, "8"),seneste_kontrol >= 3)
+# 
+# aarhus_filnavn <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/delta_aarhus/smiley_delta_aarhus",today(),".csv")
+# 
+# if (nrow(aarhus) > 0) {
+#   write_csv(aarhus, aarhus_filnavn)
+# }
+# 
+# # error message function
+# error_message <- function(x) {
+#   
+#   library(telegram.bot)
+#   
+#   bot = Bot(token = "706611759:AAG4SM86fmKX9P-ovHLgBI9fUi9UCcxSDuI")
+#   
+#   updates <- bot$getUpdates()
+#   
+#   chat_id <- updates[[1L]]$from_chat_id()
+#   
+#   time <- as.character(now())
+#   
+#   bot$sendMessage(chat_id = chat_id, text = glue::glue("An error occured while sending email - {time}"))
+# }
+# 
+# my_email <- "hr.pchristensen@gmail.com"
+# 
+# smtp <- server(host = "smtp.gmail.com",
+#                port = 465,
+#                username = "hr.pchristensen@gmail.com",
+#                password = "11euheld")
+# 
+# if (nrow(aarhus) == 0) {
+#   
+#   text <- "Ingen nye sure smileys i Aarhusområdet"
+#   subject <- "Smiley update: 0 nye"
+#   
+#   email <- envelope() %>%
+#     from(my_email) %>%
+#     to(my_email) %>%
+# #    cc("") %>%
+#     subject(subject) %>%
+#     body(text)
+#   
+#   tryCatch({
+#     smtp(email)}, error=function(e) {error_message()
+#     }
+#   )
+# }
+# 
+# if (nrow(aarhus) >= 1) {
+#   
+#   virksomheder = paste(aarhus$navn1,collapse=", ")
+#   text <- glue::glue("Kære NN\n\nDe seneste sure smileys er givet til følgende virksomheder: {virksomheder}.\n\n De nye datarækker i smiley-registret er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
+#   
+#   email <- envelope() %>%
+#     from(my_email)    %>%
+#     to(my_email)      %>%
+#     subject(glue::glue("Smiley update: {nrow(aarhus)} nye")) %>%
+#     body(text) %>%
+#     attachment(aarhus_filnavn)
+#   
+#   tryCatch({
+#     smtp(email)}, error=function(e) {error_message()
+#       
+#     }
+#   )
+# }
+
 # ----- København + ------
 
 kbh <- new %>%
   filter(  str_starts(postnr, "1") |
            str_starts(postnr, "2") |
            str_starts(postnr, "3"),
-           seneste_kontrol >= 3)
+           seneste_kontrol == 4) %>%
+  select(navn1,cvrnr,By,URL)
 
 kbh_filnavn <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_Data/delta_kbh/smiley_delta_kbh",today(),".csv")
 
