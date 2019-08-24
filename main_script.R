@@ -119,12 +119,12 @@ error_message <- function(x) {
   bot$sendMessage(chat_id = chat_id, text = glue::glue("An error occured while sending email - {time}"))
 }
 
-my_email <- "hr.pchristensen@gmail.com"
+credentials <- read_csv("credentials_PC_gmail.csv")
 
 smtp <- server(host = "smtp.gmail.com",
                port = 465,
-               username = "hr.pchristensen@gmail.com",
-               password = "11euheld")
+               username = credentials$account,
+               password = credentials$password)
 
 if (nrow(update) == 0) {
   
@@ -146,8 +146,10 @@ if (nrow(update) == 0) {
 
 if (nrow(update) >= 1) {
   
-  virksomheder = paste(update$navn1, update$By, collapse = ",\n")
-  text <- glue::glue("Hej!\n\nDagens opdatering af smiley-registret omfatter sure smileys til følgende virksomheder:\n\n {virksomheder}.\n\nLinks til kontrolrapporterne er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
+  navn = glue::glue("{update$navn1},")
+  virksomheder = paste(update$navn1, update$By, collapse = "\n")
+  
+  text <- glue::glue("Hej!\n\nDagens opdatering af smiley-registret omfatter sure smileys til følgende virksomheder:\n\n{virksomheder}.\n\nLinks til kontrolrapporterne er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
   
   email <- envelope() %>%
     from(my_email)    %>%
