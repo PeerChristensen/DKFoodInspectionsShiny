@@ -147,7 +147,7 @@ if (nrow(update) == 0) {
 if (nrow(update) >= 1) {
   
   navn = glue::glue("{update$navn1},")
-  virksomheder = paste(update$navn1, update$By, collapse = "\n")
+  virksomheder = paste(navn, update$By, collapse = "\n")
   
   text <- glue::glue("Hej!\n\nDagens opdatering af smiley-registret omfatter sure smileys til følgende virksomheder:\n\n{virksomheder}.\n\nLinks til kontrolrapporterne er vedhæftet i en csv-fil.\n\nMed venlig hilsen\n\nPeer Christensen\n\n")
   
