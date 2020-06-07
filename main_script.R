@@ -119,7 +119,7 @@ error_message <- function(x) {
   bot$sendMessage(chat_id = chat_id, text = glue::glue("An error occured while sending email - {time}"))
 }
 
-credentials <- read_csv("credentials_PC_gmail.csv")
+credentials <- read_csv("/Users/peerchristensen/Desktop/Projects/Smiley_Data/credentials_PC_gmail.csv")
 
 smtp <- server(host = "smtp.gmail.com",
                port = 465,
