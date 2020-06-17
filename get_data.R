@@ -32,6 +32,6 @@ df <- readxl::read_excel("SmileyStatus.xls") %>%
                             seneste_kontrol == 3 ~ "#f77806",
                             seneste_kontrol == 4 ~ "#e60000"))
 
-write_csv(df, "smiley_data.csv")
+write_csv(df, "smile/smiley_data.csv")
 
 # send to File share
