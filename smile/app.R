@@ -1,11 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
 library(tidyverse)
@@ -48,10 +40,13 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
 
     ')), 
             sliderInput("dato",
-                        "Fra dato:",
-                        min = min(data$seneste_kontrol_dato),
-                        max = max(data$seneste_kontrol_dato),
-                        value = lubridate::today()-180),
+                        "Vælg datointerval",
+                       # min = min(data$seneste_kontrol_dato),
+                      #  max = max(data$seneste_kontrol_dato),
+                          min = lubridate::today()-365,
+                          max = lubridate::today(),
+                          value = lubridate::today()-180,
+                          step = 30),
 
             checkboxGroupInput("checkGroup", 
                                       "Smiley/karakter", 
@@ -59,10 +54,12 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
                                                      "2" = 2, 
                                                      "3" = 3,
                                                      "4 (Sur)" = 4),
-                                      selected = c(1,2,3,4)))
-        ,
-
-        # Show a plot of the generated distribution
+                                      selected = c(1,2,3,4)),
+            h5(em("kilde: Fødevarestyrelsen")),
+            
+            
+       ),
+        
         mainPanel(
             leafletOutput("map",width = "110%", height = 800)
         ) # main panel
@@ -71,7 +68,7 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
     ), # tab panel 1
     
     tabPanel("Data",align="center",
-             downloadButton('download',"Download .csv"),
+            # downloadButton('download',"Download .csv"),
              
              DT::dataTableOutput("dataframe",width = "80%"))
     ) # navbar
@@ -107,7 +104,7 @@ server <- function(input, output) {
                                  data$adresse1,"<br>",
                                  data$postnr,data$By, "<br>",
                                  "Seneste kontrol: ",data$seneste_kontrol_dato, "<br>",
-                                 "<a href=",data$URL,'> Rapport</a>'))
+                                 "<a href=",data$URL,', target=\"_blank\"> Rapport</a>'))
         #,clusterOptions = markerClusterOptions())
     })
     
@@ -120,18 +117,18 @@ server <- function(input, output) {
             rename("Navn" = "navn1","CVR" = "cvrnr", "Adresse" = "adresse1",
                    "Postnr" = "postnr", "Seneste smiley/karakter" = "seneste_kontrol",
                    "Dato seneste kontrol" = "seneste_kontrol_dato","Rapport" = "URL") %>%
-            mutate(Rapport = paste("<a href=",data$URL,'> Link </a>'))
+            mutate(Rapport = paste("<a href=",data$URL,', target=\"_blank\"> Link </a>'))
         
         DT::datatable(data, escape = FALSE)
     })
     
-    output$download <- 
-        downloadHandler(
-            filename = "data.csv",
-            content = function(file){
-                write.csv(data,
-                          file) }
-    )
+    # output$download <- 
+    #     downloadHandler(
+    #         filename = "data.csv",
+    #         content = function(file){
+    #             write.csv(data,
+    #                       file) }
+    # )
 }
 
 
