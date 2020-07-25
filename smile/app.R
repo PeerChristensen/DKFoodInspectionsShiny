@@ -56,7 +56,7 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
                                                      "4 (Sur)" = 4),
                                       selected = c(1,2,3,4)),
             h5(em("kilde: Fødevarestyrelsen")),
-            h5(em(glue::glue("Seneste Update: {max(data$seneste_kontrol_dato)}"))),
+            h5(em(glue::glue("Seneste kontrol: {max(data$seneste_kontrol_dato)}"))),
                
             
        ),

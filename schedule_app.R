@@ -6,6 +6,7 @@ library(lubridate)
 library(rsconnect)
 library(glue)
 
+if (wday(today()) < 6) {
 print(now())
 
 destfile <- "/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus.xlsx"
@@ -29,6 +30,7 @@ df <- readxl::read_excel("/Users/peerchristensen/Desktop/Projects/Smiley_data/sm
   group_by(cvrnr) %>%
   arrange(desc(seneste_kontrol_dato)) %>%
   top_n(1,seneste_kontrol_dato) %>%
+  ungroup() %>%
   mutate(seneste_kontrol_dato = as.Date(seneste_kontrol_dato),
          lon = as.numeric(Geo_Lng),
          lat = as.numeric(Geo_Lat)) %>%
@@ -43,13 +45,26 @@ df <- readxl::read_excel("/Users/peerchristensen/Desktop/Projects/Smiley_data/sm
 
 print("file read")
 
-write_csv(df, "/Users/peerchristensen/Desktop/Projects/Smiley_data/smile/smiley_data.csv")
+previous_most_recent <- read_csv("/Users/peerchristensen/Desktop/Projects/Smiley_data/smile/smiley_data.csv") %>%
+  summarise(latest = max(seneste_kontrol_dato)) %>%
+  pull(latest)
 
-print("csv written")
+current_most_recent <- df %>%
+  summarise(latest = max(seneste_kontrol_dato)) %>%
+  pull(latest)
 
-options(rsconnect.check.certificate = FALSE)
-deployApp(appDir = "/Users/peerchristensen/Desktop/Projects/Smiley_Data/smile",
+if (current_most_recent > previous_most_recent) {
+  write_csv(df, "/Users/peerchristensen/Desktop/Projects/Smiley_data/smile/smiley_data.csv")
+
+  print("csv written")
+
+  options(rsconnect.check.certificate = FALSE)
+  deployApp(appDir = "/Users/peerchristensen/Desktop/Projects/Smiley_Data/smile",
           launch.browser = T,
           forceUpdate = T)
 
-print("app deployed")
+  print("app deployed") } else {
+    
+    print("no updates")}
+
+} else {print("weekend")}
