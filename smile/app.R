@@ -41,10 +41,10 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
     ')), 
             sliderInput("dato",
                         "Vælg datointerval",
-                       # min = min(data$seneste_kontrol_dato),
-                      #  max = max(data$seneste_kontrol_dato),
-                          min = lubridate::today()-365,
-                          max = lubridate::today(),
+                        min = min(data$seneste_kontrol_dato),
+                        max = max(data$seneste_kontrol_dato),
+                      #    min = lubridate::today()-365,
+                       #   max = lubridate::today(),
                           value = lubridate::today()-180,
                           step = 30),
 
@@ -56,7 +56,8 @@ ui <- shinyUI(fluidPage(theme = shinytheme("cerulean"),
                                                      "4 (Sur)" = 4),
                                       selected = c(1,2,3,4)),
             h5(em("kilde: Fødevarestyrelsen")),
-            
+            h5(em(glue::glue("Seneste Update: {max(data$seneste_kontrol_dato)}"))),
+               
             
        ),
         

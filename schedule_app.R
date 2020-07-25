@@ -4,17 +4,30 @@ library(tidyverse)
 library(readxl)
 library(lubridate)
 library(rsconnect)
+library(glue)
+
+print(now())
+
+destfile <- "/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus.xlsx"
+
+unlink(destfile)
 
 url <- "https://www.foedevarestyrelsen.dk/_layouts/15/sdata/smileystatus.xlsx"
-
-destfile <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus_",today(),".xlsx")
-
+ 
+#destfile <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus_",today(),".xlsx")
+#destfile <- "/Users/peerchristensen/Desktop/Projects/Smiley_data/app_data/smileystatus.xlsx"
 download.file(url = url, destfile = destfile)
 
-df <- readxl::read_excel(glue::glue("smileystatus_{today()}.xlsx")) %>%
+print("downloaded")
+
+#date <- as.character(lubridate::today())
+
+#filename <- paste0("/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus_",date,".xlsx")
+
+df <- readxl::read_excel("/Users/peerchristensen/Desktop/Projects/Smiley_data/smileystatus.xlsx") %>%
   dplyr::select(navn1,cvrnr,adresse1,postnr,By,seneste_kontrol,seneste_kontrol_dato,URL,Geo_Lng,Geo_Lat) %>%
-  group_by(cvrnr) %>% 
-  arrange(desc(seneste_kontrol_dato)) %>% 
+  group_by(cvrnr) %>%
+  arrange(desc(seneste_kontrol_dato)) %>%
   top_n(1,seneste_kontrol_dato) %>%
   mutate(seneste_kontrol_dato = as.Date(seneste_kontrol_dato),
          lon = as.numeric(Geo_Lng),
@@ -28,6 +41,15 @@ df <- readxl::read_excel(glue::glue("smileystatus_{today()}.xlsx")) %>%
                             seneste_kontrol == 3 ~ "#f77806",
                             seneste_kontrol == 4 ~ "#e60000"))
 
-write_csv(df, "smile/smiley_data.csv")
+print("file read")
 
-deployApp(appDir = "smile",launch.browser = FALSE,forceUpdate = T)
+write_csv(df, "/Users/peerchristensen/Desktop/Projects/Smiley_data/smile/smiley_data.csv")
+
+print("csv written")
+
+options(rsconnect.check.certificate = FALSE)
+deployApp(appDir = "/Users/peerchristensen/Desktop/Projects/Smiley_Data/smile",
+          launch.browser = T,
+          forceUpdate = T)
+
+print("app deployed")
